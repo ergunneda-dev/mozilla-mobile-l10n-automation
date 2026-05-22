@@ -2,7 +2,7 @@
 
 > Placeable consistency audits for Mozilla's mobile localization repositories — Firefox for Android (Fenix) and Firefox for iOS. Two Python scripts, same three-category framework as my [desktop Firefox project](https://github.com/ergunneda-dev/mozilla-l10n-automation), applied to `strings.xml` and XLIFF.
 
-May 2026 · [scripts](./scripts) · sample data for smoke-testing
+May 2026 · [scripts](./scripts) · [analyses](#highlights-from-the-real-data-runs) · sample data for smoke-testing
 
 ---
 
@@ -12,6 +12,9 @@ May 2026 · [scripts](./scripts) · sample data for smoke-testing
 |---|---|
 | [`scripts/check_placeables_android.py`](./scripts/check_placeables_android.py) | Walks `mozilla-l10n/android-l10n`, pairs `values/strings.xml` with `values-<locale>/strings.xml`, reports placeable mismatches |
 | [`scripts/check_placeables_ios.py`](./scripts/check_placeables_ios.py) | Walks `mozilla-l10n/firefoxios-l10n`, parses XLIFF, compares `<source>` and `<target>` placeables per `<trans-unit>` |
+| [`placeable-audit-android-2026-05-22.md`](./placeable-audit-android-2026-05-22.md) | Real-data analysis: 9 findings across 4 locales, categorized using the three-category framework |
+| [`placeable-audit-ios-2026-05-22.md`](./placeable-audit-ios-2026-05-22.md) | Real-data analysis: 0 findings across 25 locales — and why the zero result is meaningful, not broken |
+| [`android-*-findings.txt`](./android-ar-findings.txt) | Raw script output for each audited Android locale (the evidence behind the analysis) |
 | [`sample-data/`](./sample-data) | Tiny fixtures with intentional bugs for smoke-testing both scripts without cloning the real repos |
 
 ## Why this exists
@@ -47,6 +50,23 @@ Each format's quirks matter:
 - **Android uses `r` prefix for region variants.** `zh-CN` is `values-zh-rCN`. `pt-BR` is `values-pt-rBR`. The script accepts the literal directory suffix to avoid hiding this.
 - **XLIFF wraps untranslated units differently per tool.** Some Mozilla exports include empty `<target/>` for untranslated entries; others omit `<target>` entirely. The script treats both as "untranslated, skip" rather than "extra=[]".
 - **iOS's `%lld` is one token, not `%ll` + `d`.** The placeable regex matches the longer pattern first so we don't truncate it.
+
+## Highlights from the real-data runs
+
+**Android: 9 findings across 4 locales. iOS: 0 findings across 25.** Same audit methodology, very different result — and the contrast is the actual insight.
+
+| Platform | Scope | Comparisons | Findings |
+|---|---|---|---|
+| Android | 41 source files × 25 locales | ~1,000 file pairs | **9** (ar=5, cs=2, pl=1, de=1) |
+| iOS | 1 XLIFF × 25 locales | ~45,000 trans-units | **0** |
+
+iOS is at least 4,500× cleaner per comparison unit. That isn't noise — it's a structural difference. Three independent gates catch iOS placeable bugs before they reach the audit: Apple's build-time validation, Mozilla's `firefoxios-l10n` reference-string linter, and XLIFF's `<source>`/`<target>` pairing inside each `<trans-unit>` (which lets Pontoon show translators the source placeable inline while they write the target). Android's `strings.xml` has no equivalent compile-time check, and source/translation live in separate files. Hence the findings concentrate there.
+
+**The Arabic Tab Groups cluster is a leading indicator.** Four of the five Arabic findings are in the same recently-landed feature (Tab Groups plurals — `tab_group_tabs_count_subtitle#one` and three siblings). The pattern matches what I found in the [desktop Firefox audit](https://github.com/ergunneda-dev/mozilla-l10n-automation/blob/main/placeable-audit-2026-05-20.md) — placeable findings cluster in features that recently shipped en-US strings, before the locale team's full pass. The placeable check therefore acts as a leading indicator of which locales are running behind which features, not just a static QA tool.
+
+**Most of the audited surface is clean.** 21 of the 25 Android locales returned 0 findings. The same locales that came up "100% complete" on the desktop side (de, ko, sv, etc.) showed clean here too. Translator communities at scale.
+
+Full categorization and program-manager-level next steps: [Android analysis →](./placeable-audit-android-2026-05-22.md) · [iOS analysis →](./placeable-audit-ios-2026-05-22.md).
 
 ## Run it yourself
 
