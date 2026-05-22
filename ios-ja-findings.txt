@@ -1,0 +1,4 @@
+/workspaces/mozilla-mobile-l10n-automation/scripts/check_placeables_ios.py:72: DeprecationWarning: Testing an element's truth value will raise an exception in future versions.  Use specific 'len(elem)' or 'elem is not None' test instead.
+  body = file_elem.find("x:body", NS) or file_elem.find("body")
+
+## Summary: 0 findings across 0 XLIFF files (1 files scanned)

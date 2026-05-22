@@ -67,9 +67,14 @@ def parse_xliff(path: Path) -> dict[tuple[str, str], dict[str, list[str] | None]
     root = tree.getroot()
     out: dict[tuple[str, str], dict[str, list[str] | None]] = {}
 
-    for file_elem in root.findall(".//x:file", NS) or root.findall(".//file"):
+    files = root.findall(".//x:file", NS)
+    if not files:
+        files = root.findall(".//file")
+    for file_elem in files:
         original = file_elem.attrib.get("original", "?")
-        body = file_elem.find("x:body", NS) or file_elem.find("body")
+        body = file_elem.find("x:body", NS)
+        if body is None:
+            body = file_elem.find("body")
         if body is None:
             continue
         for tu in body:
