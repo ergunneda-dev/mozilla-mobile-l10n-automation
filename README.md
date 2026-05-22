@@ -2,7 +2,7 @@
 
 > Placeable consistency audits for Mozilla's mobile localization repositories — Firefox for Android (Fenix) and Firefox for iOS. Two Python scripts, same three-category framework as my [desktop Firefox project](https://github.com/ergunneda-dev/mozilla-l10n-automation), applied to `strings.xml` and XLIFF.
 
-May 2026 · [scripts](./scripts) · [analyses](#highlights-from-the-real-data-runs) · sample data for smoke-testing
+May 2026 · [scripts](./scripts) · [analyses](#highlights-from-the-real-data-runs) · [live CI](./.github/workflows) · sample data for smoke-testing
 
 ---
 
@@ -12,9 +12,13 @@ May 2026 · [scripts](./scripts) · [analyses](#highlights-from-the-real-data-ru
 |---|---|
 | [`scripts/check_placeables_android.py`](./scripts/check_placeables_android.py) | Walks `mozilla-l10n/android-l10n`, pairs `values/strings.xml` with `values-<locale>/strings.xml`, reports placeable mismatches |
 | [`scripts/check_placeables_ios.py`](./scripts/check_placeables_ios.py) | Walks `mozilla-l10n/firefoxios-l10n`, parses XLIFF, compares `<source>` and `<target>` placeables per `<trans-unit>` |
+| [`.github/workflows/weekly-mobile-audit.yml`](./.github/workflows/weekly-mobile-audit.yml) | **Live CI** — runs every Monday 06:00 UTC. Clones both Mozilla repos, audits 25 locales each, commits findings to `weekly-findings/` |
+| [`.github/workflows/pr-audit.yml`](./.github/workflows/pr-audit.yml) | **Live CI** — runs on every PR that touches scripts or workflows. Posts findings as a PR comment so changes can be reviewed against real-data results |
+| [`weekly-findings/`](./weekly-findings) | Per-locale audit outputs committed by the weekly workflow. The slope over time is the signal — finding counts rising in a locale flag features that recently shipped |
 | [`placeable-audit-android-2026-05-22.md`](./placeable-audit-android-2026-05-22.md) | Real-data analysis: 9 findings across 4 locales, categorized using the three-category framework |
 | [`placeable-audit-ios-2026-05-22.md`](./placeable-audit-ios-2026-05-22.md) | Real-data analysis: 0 findings across 25 locales — and why the zero result is meaningful, not broken |
 | [`android-*-findings.txt`](./android-ar-findings.txt) | Raw script output for each audited Android locale (the evidence behind the analysis) |
+| [`github-actions-examples/`](./github-actions-examples) | Workflow templates designed for installation in the upstream Mozilla repos (not live on this portfolio) |
 | [`sample-data/`](./sample-data) | Tiny fixtures with intentional bugs for smoke-testing both scripts without cloning the real repos |
 
 ## Why this exists
@@ -67,6 +71,15 @@ iOS is at least 4,500× cleaner per comparison unit. That isn't noise — it's a
 **Most of the audited surface is clean.** 21 of the 25 Android locales returned 0 findings. The same locales that came up "100% complete" on the desktop side (de, ko, sv, etc.) showed clean here too. Translator communities at scale.
 
 Full categorization and program-manager-level next steps: [Android analysis →](./placeable-audit-android-2026-05-22.md) · [iOS analysis →](./placeable-audit-ios-2026-05-22.md).
+
+## Live CI
+
+Two workflows actually run on this repo (not just example shapes):
+
+- **`weekly-mobile-audit.yml`** — Monday cron. Clones `mozilla-l10n/android-l10n` and `mozilla-l10n/firefoxios-l10n` at run time, audits 25 locales on each, commits per-locale findings to `weekly-findings/YYYY-MM-DD/`. The week-over-week diff is visible as a git diff — a locale's finding count rising over time signals a feature that recently shipped new strings.
+- **`pr-audit.yml`** — runs on every PR that touches `scripts/`, `.github/workflows/`, or `sample-data/`. Same clone-and-audit pattern, but posts results as a comment on the PR. Lets you change the audit code and see immediately whether it still reproduces the documented baselines.
+
+The workflows in `github-actions-examples/` are different — those are templates for installation inside the upstream Mozilla repos themselves (`mozilla-l10n/android-l10n` and `mozilla-l10n/firefoxios-l10n`), not on this portfolio.
 
 ## Run it yourself
 
