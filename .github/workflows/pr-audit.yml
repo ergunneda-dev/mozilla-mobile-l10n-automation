@@ -1,0 +1,107 @@
+# Per-PR full audit
+#
+# Triggers when a PR touches the audit scripts or any workflow file.
+# Clones mozilla-l10n/android-l10n and mozilla-l10n/firefoxios-l10n at PR
+# time, runs both placeable audits across the same 25-locale set the
+# weekly cron uses, and posts a findings summary as a PR comment.
+#
+# Use case: I'm changing the audit logic in scripts/. Before merge, this
+# workflow proves the change still produces sensible results against real
+# Mozilla data — not just sample-data.
+
+name: PR audit
+
+on:
+  pull_request:
+    paths:
+      - "scripts/**"
+      - ".github/workflows/**"
+      - "sample-data/**"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out PR branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Clone mozilla-l10n/android-l10n
+        uses: actions/checkout@v4
+        with:
+          repository: mozilla-l10n/android-l10n
+          path: android-l10n
+          fetch-depth: 1
+
+      - name: Clone mozilla-l10n/firefoxios-l10n
+        uses: actions/checkout@v4
+        with:
+          repository: mozilla-l10n/firefoxios-l10n
+          path: firefoxios-l10n
+          fetch-depth: 1
+
+      - name: Audit Android across all locales
+        run: |
+          mkdir -p pr-findings/android
+          for loc in tr ja de ar cs pl fr es it ko zh-rCN ru he hu pt-rBR sv nl fi vi th ms ca eu sk uk; do
+            python3 scripts/check_placeables_android.py android-l10n "$loc" \
+              > "pr-findings/android/$loc.txt" 2>&1 || true
+          done
+
+      - name: Audit iOS across all locales
+        run: |
+          mkdir -p pr-findings/ios
+          for loc in tr ja de ar cs pl fr es it ko zh-CN ru he hu pt-BR sv nl fi vi th ms ca eu sk uk; do
+            python3 scripts/check_placeables_ios.py firefoxios-l10n "$loc" \
+              > "pr-findings/ios/$loc.txt" 2>&1 || true
+          done
+
+      - name: Build PR comment
+        id: comment
+        run: |
+          {
+            echo "## PR audit results"
+            echo ""
+            echo "Findings against the real Mozilla repos at PR time, across 25 locales each."
+            echo ""
+            echo "### Android — findings per locale"
+            echo "| Locale | Findings |"
+            echo "|---|---|"
+            for f in pr-findings/android/*.txt; do
+              loc=$(basename "$f" .txt)
+              count=$(grep -c " -> " "$f" 2>/dev/null || echo 0)
+              echo "| \`$loc\` | $count |"
+            done
+            echo ""
+            echo "### iOS — findings per locale"
+            echo "| Locale | Findings |"
+            echo "|---|---|"
+            for f in pr-findings/ios/*.txt; do
+              loc=$(basename "$f" .txt)
+              count=$(grep -c " -> " "$f" 2>/dev/null || echo 0)
+              echo "| \`$loc\` | $count |"
+            done
+            echo ""
+            echo "_Reproduces the methodology of [placeable-audit-android-2026-05-22.md](../blob/main/placeable-audit-android-2026-05-22.md) and [placeable-audit-ios-2026-05-22.md](../blob/main/placeable-audit-ios-2026-05-22.md). Any change in findings vs. those baselines means either the audit code changed or upstream l10n changed._"
+          } > pr-comment.md
+
+      - name: Post comment to PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const body = fs.readFileSync("pr-comment.md", "utf8");
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: body,
+            });
