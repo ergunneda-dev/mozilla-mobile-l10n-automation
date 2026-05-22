@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="Client/Frontend/Sample.swift" source-language="en" target-language="tr" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.0" build-num="0"/>
+    </header>
+    <body>
+      <!-- OK -->
+      <trans-unit id="greeting.format">
+        <source>Hello, %@! You have %d new messages.</source>
+        <target>Merhaba %@! %d yeni mesajınız var.</target>
+      </trans-unit>
+      <!-- BUG: missing %2$d (Category 2) -->
+      <trans-unit id="positional.example">
+        <source>%1$@ shared %2$d photos with you.</source>
+        <target>%1$@ sizinle fotoğraf paylaştı.</target>
+      </trans-unit>
+      <!-- BUG: extra %@ (Category 3 / spurious) -->
+      <trans-unit id="long.format">
+        <source>Storage used: %lld bytes</source>
+        <target>Depolama: %lld bayt (%@)</target>
+      </trans-unit>
+      <!-- OK -->
+      <trans-unit id="plain.string">
+        <source>Goodbye</source>
+        <target>Güle güle</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

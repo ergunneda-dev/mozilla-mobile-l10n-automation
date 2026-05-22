@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="Client/Frontend/Sample.swift" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.0" build-num="0"/>
+    </header>
+    <body>
+      <trans-unit id="greeting.format">
+        <source>Hello, %@! You have %d new messages.</source>
+        <target>Hello, %@! You have %d new messages.</target>
+        <note>Greeting shown on home screen.</note>
+      </trans-unit>
+      <trans-unit id="positional.example">
+        <source>%1$@ shared %2$d photos with you.</source>
+        <target>%1$@ shared %2$d photos with you.</target>
+      </trans-unit>
+      <trans-unit id="long.format">
+        <source>Storage used: %lld bytes</source>
+        <target>Storage used: %lld bytes</target>
+      </trans-unit>
+      <trans-unit id="plain.string">
+        <source>Goodbye</source>
+        <target>Goodbye</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

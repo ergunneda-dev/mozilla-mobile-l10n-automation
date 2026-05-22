@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sample tr translation with intentional issues for smoke-testing. -->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- OK: same placeables, reordered -->
+    <string name="greeting">Merhaba %1$s! %2$d yeni mesajınız var.</string>
+    <!-- OK: no placeables on either side -->
+    <string name="goodbye">Güle güle</string>
+    <!-- BUG (Category 2): missing %s placeable -->
+    <string name="wrapped">Hoş geldiniz!</string>
+    <plurals name="items_count">
+        <item quantity="one">%d öğe</item>
+        <item quantity="other">%d öğe</item>
+    </plurals>
+    <!-- BUG (Category 3): extra %d that doesn't exist in source -->
+    <string name="future_feature">%s sürümünde geliyor (eski %d)</string>
+</resources>

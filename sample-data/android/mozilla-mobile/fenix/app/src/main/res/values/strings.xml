@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sample en-US source for smoke-testing check_placeables_android.py
+     Mirrors the mozilla-l10n/android-l10n directory layout. -->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="greeting">Hello, %1$s! You have %2$d new messages.</string>
+    <string name="goodbye">Goodbye</string>
+    <string name="wrapped">Welcome <xliff:g id="username" example="Eda">%s</xliff:g>!</string>
+    <plurals name="items_count">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+    <string name="future_feature">Coming in version %s</string>
+</resources>
