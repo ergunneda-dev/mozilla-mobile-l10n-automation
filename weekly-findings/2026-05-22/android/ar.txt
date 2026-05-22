@@ -1,0 +1,9 @@
+
+[mozilla-mobile/fenix/app/src/main/res/values-ar/strings.xml]
+  browser_menu_delete_browsing_data_on_quit -> missing=['%1$s'], extra=['%s']
+  tab_group_tabs_count_subtitle#one -> missing=['%1$d']
+  add_to_exiting_tab_group_content_description#one -> missing=['%2$d']
+  share_tab_group_button_content_description#one -> missing=['%2$d']
+  expanded_tab_group_header_description#one -> missing=['%2$d']
+
+## Summary: 5 findings across 1 files (41 files compared, 41 sources scanned)

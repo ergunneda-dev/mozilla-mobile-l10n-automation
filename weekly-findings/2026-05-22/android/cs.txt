@@ -1,0 +1,6 @@
+
+[mozilla-mobile/fenix/app/src/main/res/values-cs/strings.xml]
+  recently_closed_tab -> missing=['%d']
+  create_collection_save_to_collection_tab_selected -> missing=['%d']
+
+## Summary: 2 findings across 1 files (41 files compared, 41 sources scanned)

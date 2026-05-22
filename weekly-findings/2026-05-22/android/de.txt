@@ -1,0 +1,5 @@
+
+[mozilla-mobile/android-components/components/feature/sitepermissions/src/main/res/values-de/strings.xml]
+  mozac_feature_sitepermissions_storage_access_message -> missing=['%s'], extra=['%1$s']
+
+## Summary: 1 findings across 1 files (41 files compared, 41 sources scanned)
