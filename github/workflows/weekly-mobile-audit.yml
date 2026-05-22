@@ -1,0 +1,106 @@
+# Weekly mobile l10n placeable audit
+#
+# What it does:
+#   - Runs every Monday at 06:00 UTC (and on-demand via the Actions tab).
+#   - Clones mozilla-l10n/android-l10n and mozilla-l10n/firefoxios-l10n as
+#     sibling working trees in the runner.
+#   - Runs check_placeables_android.py and check_placeables_ios.py against
+#     a fixed set of locales (the same 25 the May 2026 audit covered).
+#   - Commits the per-locale findings to weekly-findings/YYYY-MM-DD/ on main.
+#
+# The findings directory grows over time, so the slope (week-over-week
+# changes per locale) becomes visible — that's the point. A single
+# snapshot is useful; a time series is more useful.
+#
+# Permissions: needs contents:write to commit findings back to the repo.
+
+name: Weekly mobile l10n placeable audit
+
+on:
+  schedule:
+    # Every Monday at 06:00 UTC. crontab.guru/#0_6_*_*_1
+    - cron: "0 6 * * 1"
+  # Adds a "Run workflow" button in the Actions tab for manual triggering.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out scripts repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Clone mozilla-l10n/android-l10n into ./android-l10n
+        uses: actions/checkout@v4
+        with:
+          repository: mozilla-l10n/android-l10n
+          path: android-l10n
+          fetch-depth: 1
+
+      - name: Clone mozilla-l10n/firefoxios-l10n into ./firefoxios-l10n
+        uses: actions/checkout@v4
+        with:
+          repository: mozilla-l10n/firefoxios-l10n
+          path: firefoxios-l10n
+          fetch-depth: 1
+
+      - name: Run Android audits per locale
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          mkdir -p "weekly-findings/$DATE/android"
+          # Same 25-locale set the May 2026 manual audit covered.
+          for loc in tr ja de ar cs pl fr es it ko zh-rCN ru he hu pt-rBR sv nl fi vi th ms ca eu sk uk; do
+            python3 scripts/check_placeables_android.py android-l10n "$loc" \
+              > "weekly-findings/$DATE/android/$loc.txt" 2>&1 || true
+          done
+
+      - name: Run iOS audits per locale
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          mkdir -p "weekly-findings/$DATE/ios"
+          # iOS locales use different region suffixes than Android (no 'r' prefix).
+          for loc in tr ja de ar cs pl fr es it ko zh-CN ru he hu pt-BR sv nl fi vi th ms ca eu sk uk; do
+            python3 scripts/check_placeables_ios.py firefoxios-l10n "$loc" \
+              > "weekly-findings/$DATE/ios/$loc.txt" 2>&1 || true
+          done
+
+      - name: Write run summary
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          {
+            echo "## Mobile l10n audit — $DATE"
+            echo ""
+            echo "### Android findings per locale"
+            for f in weekly-findings/$DATE/android/*.txt; do
+              loc=$(basename "$f" .txt)
+              count=$(grep -c " -> " "$f" 2>/dev/null || echo 0)
+              echo "- \`$loc\`: $count"
+            done
+            echo ""
+            echo "### iOS findings per locale"
+            for f in weekly-findings/$DATE/ios/*.txt; do
+              loc=$(basename "$f" .txt)
+              count=$(grep -c " -> " "$f" 2>/dev/null || echo 0)
+              echo "- \`$loc\`: $count"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit findings to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -- weekly-findings/
+          if git diff --staged --quiet; then
+            echo "No findings changes this week."
+          else
+            git commit -m "Weekly mobile l10n audit: $(date +%Y-%m-%d)"
+            git push
+          fi
