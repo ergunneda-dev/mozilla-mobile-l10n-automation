@@ -1,0 +1,5 @@
+
+[mozilla-mobile/focus-android/app/src/main/res/values-pl/strings.xml]
+  firstrun_shortcut_text -> slot_diff=['%1$s (2 in source, 1 in translation)']
+
+## Summary: 1 findings across 1 files (40 files compared, 41 sources scanned)
