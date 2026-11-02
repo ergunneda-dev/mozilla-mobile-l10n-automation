@@ -1,0 +1,1 @@
+Locale directory not found: firefoxios-l10n/sv

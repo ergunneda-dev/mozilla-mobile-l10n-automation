@@ -1,0 +1,1 @@
+No translations found for locale 'he'. Try 'tr' / 'de' / 'zh-rCN' (Android uses 'r' prefix for regions).
